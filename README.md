@@ -5,3 +5,8 @@
 - Walls
 - Cleaner code
 - Food life expectancy
+- Tests
+
+### IDEAS
+- Faster graphics ?
+- Wallpaper
