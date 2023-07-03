@@ -85,7 +85,8 @@ class Game:
 
     def delay_down(self):
         print('Delay set to ', self.delay, 'ms')
-        self.delay -= 1
+        if self.delay > 0:
+            self.delay -= 1
 
     def loop_and_update(self):
         self.loop()
