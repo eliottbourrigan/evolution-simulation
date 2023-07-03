@@ -2,17 +2,17 @@ import math
 from network import *
 import numpy as np
 
-NW_SIZES = [9, 6, 2]
+NW_SIZES = [9, 2, 1]
 INITIAL_HEALTH = 30
 HUNGER_RATE = 0.1
 MAX_HEALTH = 100
-EVOL_STD = 0.2
-MUTATION_PROB = 5e-2
-REPRODUCTION_COST = 30
+EVOL_STD = 0.1
+MUTATION_PROB = 0.01
+REPRODUCTION_COST = 20
 REPRODUCTION_HEALTH = 50
 WINDOW_SIZE = (800, 800)
 SPEED = 5
-FOOD_BONUS = 25
+FOOD_BONUS = 30
 WALL_DAMAGE = 10
 
 
@@ -52,7 +52,7 @@ def calculate_distances(agents, observer):
         if distance > 500 or distance == 0.0:
             new_distances.append(0)
         else:
-            new_distances.append(1 - distance / 500)
+            new_distances.append((1 - distance / 500)**2)
     return new_distances
 
 
@@ -94,7 +94,7 @@ def distance_to_wall(agent_x, agent_y, angle, window_width, window_height):
     if min_distance > 500:
         return 0
     else:
-        return 1 - min_distance / 500
+        return (1 - min_distance / 500) ** 2
 
 
 def health_to_color(value, is_selected):
@@ -198,8 +198,7 @@ class Agent:
         inputs = np.array(observed_agents + observed_food +
                           [self.health / MAX_HEALTH, right_wall_sight, left_wall_sight])
         outputs = self.network.feedforward(inputs)
-        self.angle += outputs[0] * 10
-        self.angle -= outputs[1] * 10
+        self.angle += (outputs[0] - 0.5) * 40
         self.angle %= 360
 
         new_x = self.x + math.cos(math.radians(self.angle)) * SPEED
