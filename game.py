@@ -27,12 +27,12 @@ class Game:
                 if len(self.agents) == 2:
                     agent.health = INITIAL_HEALTH
                 else:
-                    print('Agent died')
                     self.agents.remove(agent)
             else:
                 agent.loop(self)
-        if self.timer % 100 == 0:
-            print(self.timer)
+        if self.timer % 1000 == 0:
+            print("Interation n°" + str(self.timer) +
+                  " : Population = " + str(len(self.agents)))
 
     def draw(self):
         self.window = tk.Tk()

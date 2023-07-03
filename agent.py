@@ -13,7 +13,7 @@ REPRODUCTION_HEALTH = 50
 WINDOW_SIZE = (800, 800)
 SPEED = 5
 FOOD_BONUS = 25
-WALL_DAMAGE = 5
+WALL_DAMAGE = 10
 
 
 def calculate_distances(agents, observer):
@@ -152,7 +152,6 @@ class Agent:
                 layer.biases + other_nw.layers[k].biases) / 2
 
         new_nw.mutate(EVOL_STD, MUTATION_PROB)
-        print("Reproduced")
         return Agent(new_nw, self.x, self.y)
 
     def draw(self, canvas):
