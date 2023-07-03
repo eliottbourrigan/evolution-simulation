@@ -3,14 +3,11 @@ from food import *
 from network import *
 import numpy as np
 import tkinter as tk
-import ctypes
 import random
 import time
 
 WINDOW_SIZE = (800, 800)
 FOOD_SPAWN_PROB = 0.1
-
-ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
 
 class Game:
