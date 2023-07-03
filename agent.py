@@ -2,7 +2,7 @@ import math
 from network import *
 import numpy as np
 
-NW_SIZES = [7, 4, 2]
+NW_SIZES = [9, 6, 2]
 INITIAL_HEALTH = 30
 HUNGER_RATE = 0.1
 MAX_HEALTH = 100
@@ -53,6 +53,47 @@ def calculate_distances(agents, observer):
         else:
             new_distances.append(1 - distance / 500)
     return new_distances
+
+
+def distance_to_wall(agent_x, agent_y, angle, window_width, window_height):
+    # Convertir l'angle en radians
+    angle_rad = math.radians(angle)
+
+    # Calculer les coordonnées du vecteur directeur
+    dx = math.cos(angle_rad)
+    dy = math.sin(angle_rad)
+
+    # Initialiser la distance minimale à une valeur très élevée
+    min_distance = float('inf')
+
+    # Calculer la distance aux murs verticaux (x = 0 et x = window_width)
+    if dx != 0:
+        # Calculer la distance aux murs x = 0 et x = window_width
+        distance_left = -agent_x / dx
+        distance_right = (window_width - agent_x) / dx
+
+        # Mettre à jour la distance minimale si nécessaire
+        if distance_left > 0 and distance_left < min_distance:
+            min_distance = distance_left
+        if distance_right > 0 and distance_right < min_distance:
+            min_distance = distance_right
+
+    # Calculer la distance aux murs horizontaux (y = 0 et y = window_height)
+    if dy != 0:
+        # Calculer la distance aux murs y = 0 et y = window_height
+        distance_top = -agent_y / dy
+        distance_bottom = (window_height - agent_y) / dy
+
+        # Mettre à jour la distance minimale si nécessaire
+        if distance_top > 0 and distance_top < min_distance:
+            min_distance = distance_top
+        if distance_bottom > 0 and distance_bottom < min_distance:
+            min_distance = distance_bottom
+
+    if min_distance > 500:
+        return 0
+    else:
+        return 1 - min_distance / 500
 
 
 def health_to_color(value, is_selected):
@@ -150,16 +191,38 @@ class Agent:
         # print(observed_agents)
         observed_food = calculate_distances(game.food, self)
         # print(observed_food)
+        right_wall_sight = distance_to_wall(
+            self.x, self.y, (self.angle + 15) % 360, WINDOW_SIZE[0], WINDOW_SIZE[1])
+        left_wall_sight = distance_to_wall(
+            self.x, self.y, (self.angle - 15) % 360, WINDOW_SIZE[0], WINDOW_SIZE[1])
         inputs = np.array(observed_agents + observed_food +
-                          [self.health / MAX_HEALTH])
+                          [self.health / MAX_HEALTH, right_wall_sight, left_wall_sight])
         outputs = self.network.feedforward(inputs)
         self.angle += outputs[0] * 10
         self.angle -= outputs[1] * 10
         self.angle %= 360
-        self.x += math.cos(math.radians(self.angle)) * SPEED
-        self.x %= WINDOW_SIZE[0]
-        self.y += math.sin(math.radians(self.angle)) * SPEED
-        self.y %= WINDOW_SIZE[1]
+
+        new_x = self.x + math.cos(math.radians(self.angle)) * SPEED
+        # If out of bounds, bounce on the wall
+        if new_x < 0:
+            self.angle = 180 - self.angle
+            self.x = 1
+        elif new_x > WINDOW_SIZE[0]:
+            self.angle = 180 - self.angle
+            self.x = WINDOW_SIZE[0] - 1
+        else:
+            self.x = new_x
+
+        new_y = self.y + math.sin(math.radians(self.angle)) * SPEED
+        # If out of bounds, bounce on the wall
+        if new_y < 0:
+            self.angle = - self.angle
+            self.y = 1
+        elif new_y > WINDOW_SIZE[1]:
+            self.angle = - self.angle
+            self.y = WINDOW_SIZE[1] - 1
+        else:
+            self.y = new_y
 
         for food in game.food:
             distance = math.sqrt(

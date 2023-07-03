@@ -98,7 +98,8 @@ class Game:
                 agent.draw(self.canvas)
             for food in self.food:
                 food.draw(self.canvas)
-            time.sleep(self.delay / 1000)
+            if self.delay != 0:
+                time.sleep(self.delay / 1000)
 
         self.window.after(1, self.loop_and_update)
 
