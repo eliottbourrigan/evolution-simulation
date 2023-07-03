@@ -12,7 +12,8 @@ REPRODUCTION_COST = 30
 REPRODUCTION_HEALTH = 50
 WINDOW_SIZE = (800, 800)
 SPEED = 5
-FOOD_BONUS = 20
+FOOD_BONUS = 25
+WALL_DAMAGE = 5
 
 
 def calculate_distances(agents, observer):
@@ -207,9 +208,11 @@ class Agent:
         if new_x < 0:
             self.angle = 180 - self.angle
             self.x = 1
+            self.health -= WALL_DAMAGE
         elif new_x > WINDOW_SIZE[0]:
             self.angle = 180 - self.angle
             self.x = WINDOW_SIZE[0] - 1
+            self.health -= WALL_DAMAGE
         else:
             self.x = new_x
 
