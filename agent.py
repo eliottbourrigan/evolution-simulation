@@ -270,7 +270,7 @@ class Agent:
         self.angle %= 360
 
         new_x = self.x + math.cos(math.radians(self.angle)) * \
-            (SPEED * (is_sprinting + 2))
+            (SPEED * (is_sprinting * 2 + 1))
         self.health -= HUNGER_RATE * (is_sprinting * 3 + 1)
         # If out of bounds, bounce on the wall
         if new_x < 0:
@@ -285,7 +285,7 @@ class Agent:
             self.x = new_x
 
         new_y = self.y + math.sin(math.radians(self.angle)) * \
-            (SPEED * (is_sprinting + 2))
+            (SPEED * (is_sprinting * 2 + 1))
         # If out of bounds, bounce on the wall
         if new_y < 0:
             self.angle = - self.angle
