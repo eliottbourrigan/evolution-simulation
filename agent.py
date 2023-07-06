@@ -3,7 +3,7 @@ from network import *
 import numpy as np
 
 NW_SIZES = [9, 4, 2]
-INITIAL_HEALTH = 30
+INITIAL_HEALTH = 50
 HUNGER_RATE = 0.1
 MAX_HEALTH = 100
 EVOL_STD = 0.1
@@ -274,7 +274,7 @@ class Agent:
 
         new_x = self.x + math.cos(math.radians(self.angle)) * \
             (SPEED * (is_sprinting * 2 + 1))
-        self.health -= HUNGER_RATE
+        self.health -= HUNGER_RATE * (1 + is_sprinting)
         # If out of bounds, bounce on the wall
         if new_x < 0:
             self.angle = 180 - self.angle
