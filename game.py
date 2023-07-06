@@ -9,6 +9,12 @@ import time
 WINDOW_SIZE = (800, 800)
 FOOD_SPAWN_PROB = 0.1
 
+try:
+    import ctypes
+    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+except ImportError:
+    pass
+
 
 class Game:
     def __init__(self, n_agents, n_food):
@@ -94,6 +100,8 @@ class Game:
         if self.display:
             # Clear canvas, then redraw
             self.canvas.delete("all")
+            for agent in self.agents:
+                agent.draw_cone(self.canvas)
             for agent in self.agents:
                 agent.draw(self.canvas)
             for food in self.food:
