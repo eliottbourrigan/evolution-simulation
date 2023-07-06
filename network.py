@@ -13,11 +13,11 @@ class Layer:
         self.size = size
         self.input_size = input_size
         if str(type(weights)) == str(type(None)):
-            self.weights = np.random.randn(size, input_size) * 2
+            self.weights = np.random.randn(size, input_size)
         else:
             self.weights = weights
         if str(type(biases)) == str(type(None)):
-            self.biases = np.random.randn(size) * 2
+            self.biases = np.random.randn(size)
         else:
             self.biases = biases
 
@@ -40,7 +40,7 @@ class Layer:
         for k, w in enumerate(self.weights):
             for i in range(len(w)):
                 if np.random.rand() < mutate_prob:
-                    self.weights[k, i] = np.random.randn() * 2
+                    self.weights[k, i] = np.random.randn()
                 else:
                     self.weights[k, i] += evol_std * np.random.randn()
         for k, b in enumerate(self.biases):

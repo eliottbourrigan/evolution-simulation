@@ -12,7 +12,7 @@ FOOD_SPAWN_PROB = 0.1
 try:
     import ctypes
     ctypes.windll.shcore.SetProcessDpiAwareness(1)
-except ImportError:
+except:
     pass
 
 
@@ -113,7 +113,7 @@ class Game:
 
 
 if __name__ == "__main__":
-    game = Game(20, 30)
+    game = Game(20, 100)
     # Print all initial angles :
     for i, agent in enumerate(game.agents):
         print(i, ':', agent.angle)

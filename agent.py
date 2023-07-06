@@ -2,7 +2,7 @@ import math
 from network import *
 import numpy as np
 
-NW_SIZES = [9, 2, 1]
+NW_SIZES = [9, 4, 2]
 INITIAL_HEALTH = 30
 HUNGER_RATE = 0.1
 MAX_HEALTH = 100
@@ -119,6 +119,7 @@ def health_to_color(value, is_selected):
 
 class Agent:
     def __init__(self, nw=None, x=None, y=None, angle=None):
+        self.is_sprinting = False
         if nw == None:
             self.network = Network(NW_SIZES[0])
             for size in NW_SIZES[1:]:
@@ -179,8 +180,8 @@ class Agent:
                            fill=health_color, outline='', width=0)
         '''
         # Draw agent as triangle pointing in the direction of the agent
-        if self.selected:
-            ag_rad = 13
+        if self.is_sprinting:
+            ag_rad = 11
             health_color = health_to_color(self.health, True)
             if self.selected:
                 outline = "white"
@@ -210,7 +211,10 @@ class Agent:
                                       self.angle - 120)) * ag_rad,
                                   fill='white', outline='')
 
-        ag_rad = 10
+        if self.selected:
+            ag_rad = 9
+        else:
+            ag_rad = 10
         health_color = health_to_color(self.health, True)
         if self.selected:
             outline = "white"
@@ -248,7 +252,7 @@ class Agent:
         '''
 
     def loop(self, game):
-        self.health -= HUNGER_RATE
+
         observed_agents = calculate_distances(game.agents, self)
         # print(observed_agents)
         observed_food = calculate_distances(game.food, self)
@@ -261,9 +265,13 @@ class Agent:
                           [self.health / MAX_HEALTH, right_wall_sight, left_wall_sight])
         outputs = self.network.feedforward(inputs)
         self.angle += (outputs[0] - 0.5) * 40
+        is_sprinting = outputs[1] > 0.5
+        self.is_sprinting = is_sprinting
         self.angle %= 360
 
-        new_x = self.x + math.cos(math.radians(self.angle)) * SPEED
+        new_x = self.x + math.cos(math.radians(self.angle)) * \
+            (SPEED * (is_sprinting + 2))
+        self.health -= HUNGER_RATE * (is_sprinting * 3 + 1)
         # If out of bounds, bounce on the wall
         if new_x < 0:
             self.angle = 180 - self.angle
@@ -276,7 +284,8 @@ class Agent:
         else:
             self.x = new_x
 
-        new_y = self.y + math.sin(math.radians(self.angle)) * SPEED
+        new_y = self.y + math.sin(math.radians(self.angle)) * \
+            (SPEED * (is_sprinting + 2))
         # If out of bounds, bounce on the wall
         if new_y < 0:
             self.angle = - self.angle
