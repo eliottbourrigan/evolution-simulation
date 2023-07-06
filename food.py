@@ -9,5 +9,5 @@ class Food:
         self.y = np.random.randint(0, WINDOW_SIZE[1])
 
     def draw(self, canvas):
-        canvas.create_oval(self.x - 5, self.y - 5, self.x +
-                           5, self.y + 5, fill="green")
+        canvas.create_oval(self.x - 3, self.y - 3, self.x +
+                           3, self.y + 3, fill="green")

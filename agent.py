@@ -3,8 +3,8 @@ from network import *
 import numpy as np
 
 NW_SIZES = [9, 2, 1]
-INITIAL_HEALTH = 30
-HUNGER_RATE = 0.1
+INITIAL_HEALTH = 50
+HUNGER_RATE = 0.08
 MAX_HEALTH = 100
 EVOL_STD = 0.1
 MUTATION_PROB = 0.01
@@ -12,7 +12,7 @@ REPRODUCTION_COST = 20
 REPRODUCTION_HEALTH = 50
 WINDOW_SIZE = (800, 800)
 SPEED = 5
-FOOD_BONUS = 30
+FOOD_BONUS = 40
 WALL_DAMAGE = 10
 
 
@@ -112,7 +112,7 @@ def health_to_color(value, is_selected):
     blue = int(value / 100 * 255)
 
     # Conversion en format hexadécimal
-    color_hex = "#{:02x}{:02x}ff".format(red, blue)
+    color_hex = "#{:02x}00{:02x}".format(red, blue)
 
     return color_hex
 
@@ -154,36 +154,98 @@ class Agent:
         new_nw.mutate(EVOL_STD, MUTATION_PROB)
         return Agent(new_nw, self.x, self.y)
 
+    def draw_cone(self, canvas):
+        if self.selected:
+            cone_color = "yellow"
+            cone_size = 300
+            cone_angles = [-45, -15, 15, 45]
+            colors = ["#0c0c22", "#0f0f25", "#0c0c22"]
+            for i in range(len(cone_angles) - 1):
+                start_angle = - self.angle + cone_angles[i]
+                end_angle = - self.angle + cone_angles[i + 1]
+                canvas.create_arc(self.x - cone_size, self.y - cone_size,
+                                  self.x + cone_size, self.y + cone_size,
+                                  start=start_angle, extent=end_angle - start_angle,
+                                  outline='#0a0a1f', fill=colors[i], width=2)
+
     def draw(self, canvas):
         # Draw cone of sight
         '''
-        cone_color = "yellow"
-        cone_size = 100
-        cone_angle = 45
-        start_angle = - self.angle - cone_angle
-        end_angle = - self.angle + cone_angle
-        canvas.create_arc(self.x - cone_size, self.y - cone_size,
-                          self.x + cone_size, self.y + cone_size,
-                          start=start_angle, extent=2 * cone_angle,
-                          outline=cone_color)
-        '''
-
         # Draw agent as a red circle
         health_color = health_to_color(self.health, self.selected)
-        agent_radius = 5
-        canvas.create_oval(self.x - agent_radius, self.y - agent_radius,
-                           self.x + agent_radius, self.y + agent_radius,
+        ag_rad = 5
+        canvas.create_oval(self.x - ag_rad, self.y - ag_rad,
+                           self.x + ag_rad, self.y + ag_rad,
                            fill=health_color, outline='', width=0)
+        '''
+        # Draw agent as triangle pointing in the direction of the agent
+        if self.selected:
+            ag_rad = 13
+            health_color = health_to_color(self.health, True)
+            if self.selected:
+                outline = "white"
+            else:
+                outline = ""
+            x, y = self.x, self.y
+            next_x, next_y = x + math.cos(math.radians(self.angle)) * ag_rad, y + math.sin(
+                math.radians(self.angle)) * ag_rad
+            canvas.create_polygon(next_x, next_y,
+                                  x +
+                                  math.cos(math.radians(
+                                      self.angle + 120)) * ag_rad,
+                                  y +
+                                  math.sin(math.radians(
+                                      self.angle + 120)) * ag_rad,
+                                  x +
+                                  math.cos(math.radians(
+                                      self.angle - 180)) * 3,
+                                  y +
+                                  math.sin(math.radians(
+                                      self.angle - 180)) * 3,
+                                  x +
+                                  math.cos(math.radians(
+                                      self.angle - 120)) * ag_rad,
+                                  y +
+                                  math.sin(math.radians(
+                                      self.angle - 120)) * ag_rad,
+                                  fill='white', outline='')
 
+        ag_rad = 10
+        health_color = health_to_color(self.health, True)
+        if self.selected:
+            outline = "white"
+        else:
+            outline = ""
+        x, y = self.x, self.y
+        next_x, next_y = x + math.cos(math.radians(self.angle)) * ag_rad, y + math.sin(
+            math.radians(self.angle)) * ag_rad
+        canvas.create_polygon(next_x, next_y,
+                              x +
+                              math.cos(math.radians(
+                                  self.angle + 120)) * ag_rad,
+                              y +
+                              math.sin(math.radians(
+                                  self.angle + 120)) * ag_rad,
+                              x, y,
+                              x +
+                              math.cos(math.radians(
+                                  self.angle - 120)) * ag_rad,
+                              y +
+                              math.sin(math.radians(
+                                  self.angle - 120)) * ag_rad,
+                              fill=health_color, outline='')
+
+        '''
         # Draw point in the direction of the agent
         x, y = self.x, self.y
         next_x = self.x + \
-            math.cos(math.radians(self.angle)) * agent_radius * 2.5
+            math.cos(math.radians(self.angle)) * ag_rad * 2.5
         next_y = self.y + \
-            math.sin(math.radians(self.angle)) * agent_radius * 2.5
+            math.sin(math.radians(self.angle)) * ag_rad * 2.5
         x, y = next_x, next_y
         canvas.create_oval(x - 3, y - 3, x + 3, y + 3,
                            fill=health_color, outline='', width=0)
+        '''
 
     def loop(self, game):
         self.health -= HUNGER_RATE
