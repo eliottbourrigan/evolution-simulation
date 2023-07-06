@@ -1,144 +1,31 @@
 import math
 from network import *
 import numpy as np
-
-NW_SIZES = [9, 4, 2]
-INITIAL_HEALTH = 50
-HUNGER_RATE = 0.1
-MAX_HEALTH = 100
-EVOL_STD = 0.1
-MUTATION_PROB = 0.01
-REPRODUCTION_COST = 20
-REPRODUCTION_HEALTH = 50
-WINDOW_SIZE = (800, 800)
-SPEED = 5
-FOOD_BONUS = 30
-WALL_DAMAGE = 10
-
-
-def calculate_distances(agents, observer):
-    left_cone = (-45, -15)
-    central_cone = (-15, 15)
-    right_cone = (15, 45)
-
-    # distances pour chaque cône (gauche, central, droit)
-    distances = [0, 0, 0]
-
-    for agent in agents:
-        # Calculer l'angle entre l'agent observateur et l'agent actuel
-        angle = math.degrees(math.atan2(
-            - observer.y + agent.y, - observer.x + agent.x))
-
-        # Soustraire l'angle de vision de l'agent observateur
-        angle -= observer.angle
-
-        # Calculer la distance entre l'agent observateur et l'agent actuel
-        distance = math.sqrt(
-            (agent.x - observer.x)**2 + (agent.y - observer.y)**2)
-
-        # Vérifier dans quel cône se trouve l'agent actuel
-        if left_cone[0] <= angle <= left_cone[1]:
-            if distances[0] == 0 or distance < distances[0]:
-                distances[0] = distance
-        elif central_cone[0] <= angle <= central_cone[1]:
-            if distances[1] == 0 or distance < distances[1]:
-                distances[1] = distance
-        elif right_cone[0] <= angle <= right_cone[1]:
-            if distances[2] == 0 or distance < distances[2]:
-                distances[2] = distance
-
-    new_distances = []
-    for distance in distances:
-        if distance > 500 or distance == 0.0:
-            new_distances.append(0)
-        else:
-            new_distances.append((1 - distance / 500)**2)
-    return new_distances
-
-
-def distance_to_wall(agent_x, agent_y, angle, window_width, window_height):
-    # Convertir l'angle en radians
-    angle_rad = math.radians(angle)
-
-    # Calculer les coordonnées du vecteur directeur
-    dx = math.cos(angle_rad)
-    dy = math.sin(angle_rad)
-
-    # Initialiser la distance minimale à une valeur très élevée
-    min_distance = float('inf')
-
-    # Calculer la distance aux murs verticaux (x = 0 et x = window_width)
-    if dx != 0:
-        # Calculer la distance aux murs x = 0 et x = window_width
-        distance_left = -agent_x / dx
-        distance_right = (window_width - agent_x) / dx
-
-        # Mettre à jour la distance minimale si nécessaire
-        if distance_left > 0 and distance_left < min_distance:
-            min_distance = distance_left
-        if distance_right > 0 and distance_right < min_distance:
-            min_distance = distance_right
-
-    # Calculer la distance aux murs horizontaux (y = 0 et y = window_height)
-    if dy != 0:
-        # Calculer la distance aux murs y = 0 et y = window_height
-        distance_top = -agent_y / dy
-        distance_bottom = (window_height - agent_y) / dy
-
-        # Mettre à jour la distance minimale si nécessaire
-        if distance_top > 0 and distance_top < min_distance:
-            min_distance = distance_top
-        if distance_bottom > 0 and distance_bottom < min_distance:
-            min_distance = distance_bottom
-
-    if min_distance > 500:
-        return 0
-    else:
-        return (1 - min_distance / 500) ** 2
-
-
-def health_to_color(value, is_selected):
-    if not is_selected:
-        return "#333333"
-
-    # Vérification des limites
-    if value < 0:
-        value = 0
-    elif value > 100:
-        value = 100
-
-    # Calcul de la composante rouge et bleue en fonction de la valeur
-    red = int((100 - value) / 100 * 255)
-    blue = int(value / 100 * 255)
-
-    # Conversion en format hexadécimal
-    color_hex = "#{:02x}00{:02x}".format(red, blue)
-
-    return color_hex
+from config import Config
 
 
 class Agent:
     def __init__(self, nw=None, x=None, y=None, angle=None):
         self.is_sprinting = False
         if nw == None:
-            self.network = Network(NW_SIZES[0])
-            for size in NW_SIZES[1:]:
+            self.network = Network(Config.network_dimensions[0])
+            for size in Config.network_dimensions[1:]:
                 self.network.add_layer(size)
         else:
             self.network = nw
         if x == None:
-            self.x = np.random.randint(0, WINDOW_SIZE[0])
+            self.x = np.random.randint(0, Config.display_dimensions[0])
         else:
             self.x = x
         if y == None:
-            self.y = np.random.randint(0, WINDOW_SIZE[1])
+            self.y = np.random.randint(0, Config.display_dimensions[1])
         else:
             self.y = y
         if angle == None:
             self.angle = np.random.randint(0, 360)
         else:
             self.angle = angle
-        self.health = INITIAL_HEALTH
+        self.health = Config.agent_init_health
         self.selected = False
 
     def reproduce(self, other_agent):
@@ -152,7 +39,7 @@ class Agent:
             new_nw.layers[k].biases = (
                 layer.biases + other_nw.layers[k].biases) / 2
 
-        new_nw.mutate(EVOL_STD, MUTATION_PROB)
+        new_nw.mutate(Config.network_evol_std, Config.network_mut_prob)
         return Agent(new_nw, self.x, self.y)
 
     def draw_cone(self, canvas):
@@ -258,44 +145,43 @@ class Agent:
         observed_food = calculate_distances(game.food, self)
         # print(observed_food)
         right_wall_sight = distance_to_wall(
-            self.x, self.y, (self.angle + 15) % 360, WINDOW_SIZE[0], WINDOW_SIZE[1])
+            self.x, self.y, (self.angle + 15) % 360, Config.display_dimensions[0], Config.display_dimensions[1])
         left_wall_sight = distance_to_wall(
-            self.x, self.y, (self.angle - 15) % 360, WINDOW_SIZE[0], WINDOW_SIZE[1])
+            self.x, self.y, (self.angle - 15) % 360, Config.display_dimensions[0], Config.display_dimensions[1])
         inputs = np.array(observed_agents + observed_food +
-                          [self.health / MAX_HEALTH, right_wall_sight, left_wall_sight])
+                          [self.health / Config.agent_max_health, right_wall_sight, left_wall_sight])
         outputs = self.network.feedforward(inputs)
 
-        is_sprinting = outputs[1] > 0.7
-        if not is_sprinting:
-            self.angle += (outputs[0] - 0.5) * 40
+        sprint = outputs[1] * 3
+        self.angle += (outputs[0] - 0.5) * 40 / (1 + 4 * sprint)
 
-        self.is_sprinting = is_sprinting
+        self.is_sprinting = False
         self.angle %= 360
 
         new_x = self.x + math.cos(math.radians(self.angle)) * \
-            (SPEED * (is_sprinting * 2 + 1))
-        self.health -= HUNGER_RATE * (1 + is_sprinting)
+            (Config.agent_speed * (sprint * 2 + 1))
+        self.health -= Config.agent_hunger
         # If out of bounds, bounce on the wall
         if new_x < 0:
             self.angle = 180 - self.angle
             self.x = 1
-            self.health -= WALL_DAMAGE
-        elif new_x > WINDOW_SIZE[0]:
+            self.health -= Config.agent_wall_damage
+        elif new_x > Config.display_dimensions[0]:
             self.angle = 180 - self.angle
-            self.x = WINDOW_SIZE[0] - 1
-            self.health -= WALL_DAMAGE
+            self.x = Config.display_dimensions[0] - 1
+            self.health -= Config.agent_wall_damage
         else:
             self.x = new_x
 
         new_y = self.y + math.sin(math.radians(self.angle)) * \
-            (SPEED * (is_sprinting * 2 + 1))
+            (Config.agent_speed * (sprint * 2 + 1))
         # If out of bounds, bounce on the wall
         if new_y < 0:
             self.angle = - self.angle
             self.y = 1
-        elif new_y > WINDOW_SIZE[1]:
+        elif new_y > Config.display_dimensions[1]:
             self.angle = - self.angle
-            self.y = WINDOW_SIZE[1] - 1
+            self.y = Config.display_dimensions[1] - 1
         else:
             self.y = new_y
 
@@ -303,8 +189,8 @@ class Agent:
             distance = math.sqrt(
                 (food.x - self.x)**2 + (food.y - self.y)**2)
             if distance < 10:
-                self.health += FOOD_BONUS
-                self.health = min(self.health, MAX_HEALTH)
+                self.health += Config.food_recompense
+                self.health = min(self.health, Config.agent_max_health)
                 game.food.remove(food)
 
         for agent in game.agents:
@@ -312,7 +198,7 @@ class Agent:
                 (agent.x - self.x)**2 + (agent.y - self.y)**2)
             if distance < 10:
                 if distance > 0.0:
-                    if self.health > REPRODUCTION_HEALTH and agent.health > REPRODUCTION_HEALTH:
-                        self.health -= REPRODUCTION_COST
-                        agent.health -= REPRODUCTION_COST
+                    if self.health > Config.reproduction_min_health and agent.health > Config.reproduction_min_health:
+                        self.health -= Config.reproduction_cost
+                        agent.health -= Config.reproduction_cost
                         game.agents.append(self.reproduce(agent))

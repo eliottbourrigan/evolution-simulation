@@ -110,10 +110,13 @@ class Game:
                 time.sleep(self.delay / 1000)
 
         self.window.after(1, self.loop_and_update)
+    
+    def get_agent_positions(self):
+        return [[agent.x, agent.y] for agent in self.agents]
 
 
 if __name__ == "__main__":
-    game = Game(20, 100)
+    game = Game(50, 100)
     # Print all initial angles :
     for i, agent in enumerate(game.agents):
         print(i, ':', agent.angle)

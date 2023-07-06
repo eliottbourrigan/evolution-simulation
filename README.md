@@ -9,4 +9,5 @@
 
 ### IDEAS
 - Faster graphics ?
-- Wallpaper
+- This as a wallpaper
+- Custom music ?
