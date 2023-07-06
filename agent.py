@@ -264,14 +264,17 @@ class Agent:
         inputs = np.array(observed_agents + observed_food +
                           [self.health / MAX_HEALTH, right_wall_sight, left_wall_sight])
         outputs = self.network.feedforward(inputs)
-        self.angle += (outputs[0] - 0.5) * 40
-        is_sprinting = outputs[1] > 0.5
+
+        is_sprinting = outputs[1] > 0.7
+        if not is_sprinting:
+            self.angle += (outputs[0] - 0.5) * 40
+
         self.is_sprinting = is_sprinting
         self.angle %= 360
 
         new_x = self.x + math.cos(math.radians(self.angle)) * \
             (SPEED * (is_sprinting * 2 + 1))
-        self.health -= HUNGER_RATE * (is_sprinting * 3 + 1)
+        self.health -= HUNGER_RATE
         # If out of bounds, bounce on the wall
         if new_x < 0:
             self.angle = 180 - self.angle
