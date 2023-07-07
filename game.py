@@ -8,7 +8,7 @@ import time
 
 try:
     import ctypes
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    # ctypes.windll.shcore.SetProcessDpiAwareness(1)
 except:
     pass
 
@@ -75,6 +75,8 @@ class Game:
     def toggle_display(self):
         ''' Toggles the display '''
         self.display = not self.display
+        for agent in self.agents:
+            agent.tail = []
 
     def delay_up(self):
         ''' Increases the delay '''

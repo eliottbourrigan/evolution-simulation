@@ -28,13 +28,13 @@ class Config:
     display_bg_color = "#0a0a1f"
     display_bg_color_ = (10, 10, 31)
     display_outline_color = "#ffffff"
-    display_tail_length = 50
-    display_tail_alpha = 0.7
+    display_tail_length = 10
+    display_tail_alpha = 0.3
 
     # Food parameters
     food_recompense = 30
     food_spawn_prob = 0.1
 
-    # Initial population parameters
+    # Initial parameters
     initial_number_agents = 20
     initial_number_food = 100

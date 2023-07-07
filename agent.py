@@ -71,6 +71,11 @@ class Agent:
 
     def draw_tail(self, canvas):
         ''' Draw agent's tail '''
+
+        if len(self.tail) == Config.display_tail_length:
+            self.tail = self.tail[1:]
+        self.tail.append([self.x, self.y, health_to_color(self.health)])
+
         current_tail = self.tail + \
             [[self.x, self.y, health_to_color(self.health)]]
         for i, [x, y, c] in enumerate(self.tail):
@@ -103,9 +108,6 @@ class Agent:
         new_y = self.y + \
             math.sin(math.radians(self.angle)) * Config.agent_speed
         self.health -= Config.agent_hunger
-        if len(self.tail) == Config.display_tail_length:
-            self.tail = self.tail[1:]
-        self.tail.append([self.x, self.y, health_to_color(self.health)])
 
         # If out of bounds in x, bounce on the wall
         if new_x < 0:
