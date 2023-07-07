@@ -1,7 +1,8 @@
+import math
 from config import Config
 
 
-def cone_sight(positions: list, agent: Agent) -> list:
+def cone_sight(positions, agent):
     ''' Computes the sight input for the agent '''
 
     cones_min_dist = [float("inf") for _ in Config.agent_sight_cones]
@@ -13,7 +14,7 @@ def cone_sight(positions: list, agent: Agent) -> list:
         distance = math.sqrt((agent.x - x)**2 + (agent.y - y)**2)
 
         # Checks if the position is in the agent's sight
-        for [start_angle, end_angle] in Config.agent_sight_cones:
+        for i, [start_angle, end_angle] in enumerate(Config.agent_sight_cones):
             if start_angle <= angle <= end_angle and distance < cones_min_dist[i]:
                 cones_min_dist[i] = distance
 

@@ -1,3 +1,6 @@
+import math
+
+
 def cos_rad(x):
     # Returns the cosine of x (x in degrees)
     return math.cos(math.radians(x))
