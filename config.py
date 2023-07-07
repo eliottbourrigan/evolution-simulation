@@ -36,5 +36,5 @@ class Config:
     food_spawn_prob = 0.1
 
     # Initial population parameters
-    initial_number_agents = 2
+    initial_number_agents = 20
     initial_number_food = 100
